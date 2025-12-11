@@ -1,0 +1,249 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Happy Birthday My Bestie!</title>
+<style>
+  body {
+    margin: 0;
+    background: radial-gradient(circle at center, #d8b4fe 0%, #a855f7 40%, #7c3aed 80%);
+    font-family: "Poppins", sans-serif;
+    color: #fff;
+    text-align: center;
+    overflow-x: hidden;
+    scroll-behavior: smooth;
+    position: relative;
+  }
+
+  main {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+  }
+
+  h1 {
+    font-size: 2.8rem;
+    margin-bottom: 10px;
+    text-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    opacity: 0;
+    transform: translateY(20px);
+    transition: all 1s ease;
+  }
+
+  p {
+    font-size: 1.1rem;
+    margin-bottom: 10px;
+    opacity: 0;
+    transform: translateY(20px);
+    transition: all 1s ease 0.3s;
+  }
+
+  footer {
+    text-align: center;
+    font-size: 0.9rem;
+    color: rgba(255,255,255,0.9);
+    opacity: 0.7;
+    margin-top: 120px;
+    margin-bottom: 30px;
+  }
+
+  #tap {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    backdrop-filter: blur(6px);
+    background: rgba(168, 85, 247, 0.3);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: #fff;
+    font-weight: 600;
+    font-size: 1.3rem;
+    text-shadow: 0 2px 6px rgba(0,0,0,0.3);
+    transition: opacity 1s ease;
+    cursor: pointer;
+    z-index: 10;
+  }
+
+  .hidden {
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .show {
+    opacity: 1 !important;
+    transform: translateY(0) !important;
+  }
+
+  #message {
+    margin-top: 60vh;
+    font-size: 1.3rem;
+    opacity: 0;
+    transform: translateY(30px);
+    transition: all 2s ease;
+    padding: 30px;
+    max-width: 600px;
+    margin-left: auto;
+    margin-right: auto;
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    border-radius: 20px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    line-height: 1.6;
+}
+
+#message h2 {
+    font-size: 1.8rem;
+    margin-top: 0;
+    margin-bottom: 20px;
+    color: #fff;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+}
+
+#message p {
+    font-size: 1.2rem;
+    margin-bottom: 20px;
+    color: rgba(255, 255, 255, 0.9);
+    opacity: 1 !important;
+    transform: none !important;
+}
+
+#message .highlight {
+    font-weight: bold;
+    color: #ffd166;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.2);
+}
+
+#message .signature {
+    font-size: 1.4rem;
+    font-style: italic;
+    margin-top: 30px;
+    padding-top: 20px;
+    border-top: 1px solid rgba(255, 255, 255, 0.3);
+    color: #fff;
+    font-weight: 600;
+}
+
+#message.show {
+    opacity: 1;
+    transform: translateY(0);
+}
+</style>
+</head>
+<body>
+  <div id="tap">✨ Tap anywhere to start your surprise ✨</div>
+
+  <main>
+    <h1>🎂 Happy Birthday, BFF! 🎉</h1>
+    <p>Wishing you love, laughter, and endless happiness 💕</p>
+  </main>
+
+  <div id="message">
+    <h2>HAPPY BIRTHDAY BOIII !!!</h2>
+    
+    <p>congrats 36 ka na, pwede na magbuntis. late aq pero nawa'y na-enjoy mo ang imong bornday, wag ka magbabago boi stay kupal.</p>
+    
+    <p>di aq sanay maglong message e, <span class="highlight">lab kita boi wag ka muna mamamatay</span>. magpapayaman pa tayo.</p>
+    
+    <div class="signature">— Lovingly your BFF 💌</div>
+</div>
+
+  <footer>Made with ❤️</footer>
+
+<script>
+let audioCtx;
+
+function playNote(freq, duration, startTime) {
+  const osc = audioCtx.createOscillator();
+  const gain = audioCtx.createGain();
+  osc.connect(gain);
+  gain.connect(audioCtx.destination);
+  osc.frequency.value = freq;
+  osc.type = 'triangle';
+  gain.gain.setValueAtTime(0.15, startTime);
+  gain.gain.exponentialRampToValueAtTime(0.001, startTime + duration / 1000);
+  osc.start(startTime);
+  osc.stop(startTime + duration / 1000);
+}
+
+function playBirthdaySongLoop() {
+  if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  let now = audioCtx.currentTime;
+
+  const notes = [
+    [264, 250], [264, 250], [297, 500], [264, 500], [352, 500], [330, 1000],
+    [264, 250], [264, 250], [297, 500], [264, 500], [396, 500], [352, 1000],
+    [264, 250], [264, 250], [528, 500], [440, 500], [352, 500], [330, 500], [297, 1000],
+    [466, 250], [466, 250], [440, 500], [352, 500], [396, 500], [352, 1500]
+  ];
+
+  let totalDuration = 0;
+  for (const [_, dur] of notes) totalDuration += dur * 1.15;
+
+  let t = 0;
+  for (const [freq, dur] of notes) {
+    playNote(freq, dur, now + t / 1000);
+    t += dur * 1.15;
+  }
+
+  setTimeout(playBirthdaySongLoop, totalDuration);
+}
+
+function smoothScrollTo(targetY, duration = 4000) {
+  const startY = window.scrollY;
+  const diff = targetY - startY;
+  const startTime = performance.now();
+
+  function animate(time) {
+    const elapsed = time - startTime;
+    const progress = Math.min(elapsed / duration, 1);
+    const ease = 1 - Math.pow(1 - progress, 3);
+    window.scrollTo(0, startY + diff * ease);
+    if (progress < 1) requestAnimationFrame(animate);
+  }
+  requestAnimationFrame(animate);
+}
+
+function startSurprise() {
+  const tap = document.getElementById("tap");
+  const h1 = document.querySelector("h1");
+  const p = document.querySelector("p");
+  const message = document.getElementById("message");
+
+  if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  if (audioCtx.state === 'suspended') {
+    audioCtx.resume().then(() => {
+      startAnimationAndMusic();
+    });
+  } else {
+    startAnimationAndMusic();
+  }
+
+  function startAnimationAndMusic() {
+    tap.classList.add("hidden");
+    h1.classList.add("show");
+    p.classList.add("show");
+
+    setTimeout(() => {
+      playBirthdaySongLoop();
+
+      setTimeout(() => {
+        message.classList.add("show");
+
+        const y = message.getBoundingClientRect().top + window.scrollY - 50;
+        smoothScrollTo(y, 4000);
+      }, 5000);
+    }, 300);
+  }
+}
+
+document.getElementById("tap").addEventListener("click", startSurprise);
+document.getElementById("tap").addEventListener("touchstart", startSurprise);
+</script>
+</body>
+</html>
