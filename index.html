@@ -14,6 +14,9 @@
     overflow-x: hidden;
     scroll-behavior: smooth;
     position: relative;
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    user-select: none;
   }
 
   main {
@@ -22,10 +25,12 @@
     align-items: center;
     justify-content: center;
     height: 100vh;
+    padding: 20px;
+    box-sizing: border-box;
   }
 
   h1 {
-    font-size: 2.8rem;
+    font-size: clamp(2rem, 5vw, 2.8rem);
     margin-bottom: 10px;
     text-shadow: 0 4px 12px rgba(0,0,0,0.2);
     opacity: 0;
@@ -34,7 +39,7 @@
   }
 
   p {
-    font-size: 1.1rem;
+    font-size: clamp(1rem, 3vw, 1.1rem);
     margin-bottom: 10px;
     opacity: 0;
     transform: translateY(20px);
@@ -48,6 +53,7 @@
     opacity: 0.7;
     margin-top: 120px;
     margin-bottom: 30px;
+    padding: 0 20px;
   }
 
   #tap {
@@ -63,11 +69,15 @@
     align-items: center;
     color: #fff;
     font-weight: 600;
-    font-size: 1.3rem;
+    font-size: clamp(1.1rem, 4vw, 1.3rem);
     text-shadow: 0 2px 6px rgba(0,0,0,0.3);
     transition: opacity 1s ease;
     cursor: pointer;
     z-index: 10;
+    padding: 20px;
+    box-sizing: border-box;
+    text-align: center;
+    -webkit-tap-highlight-color: transparent;
   }
 
   .hidden {
@@ -95,10 +105,16 @@
     border-radius: 20px;
     border: 1px solid rgba(255, 255, 255, 0.2);
     line-height: 1.6;
+    width: calc(100% - 40px);
+    margin-left: 20px;
+    margin-right: 20px;
+    box-sizing: border-box;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
 }
 
 #message h2 {
-    font-size: 1.8rem;
+    font-size: clamp(1.5rem, 4vw, 1.8rem);
     margin-top: 0;
     margin-bottom: 20px;
     color: #fff;
@@ -106,7 +122,7 @@
 }
 
 #message p {
-    font-size: 1.2rem;
+    font-size: clamp(1rem, 3vw, 1.2rem);
     margin-bottom: 20px;
     color: rgba(255, 255, 255, 0.9);
     opacity: 1 !important;
@@ -120,7 +136,7 @@
 }
 
 #message .signature {
-    font-size: 1.4rem;
+    font-size: clamp(1.2rem, 3vw, 1.4rem);
     font-style: italic;
     margin-top: 30px;
     padding-top: 20px;
@@ -157,22 +173,30 @@
 
 <script>
 let audioCtx;
+let isPlaying = false;
 
 function playNote(freq, duration, startTime) {
-  const osc = audioCtx.createOscillator();
-  const gain = audioCtx.createGain();
-  osc.connect(gain);
-  gain.connect(audioCtx.destination);
-  osc.frequency.value = freq;
-  osc.type = 'triangle';
-  gain.gain.setValueAtTime(0.15, startTime);
-  gain.gain.exponentialRampToValueAtTime(0.001, startTime + duration / 1000);
-  osc.start(startTime);
-  osc.stop(startTime + duration / 1000);
+  if (!audioCtx || audioCtx.state === 'closed') return;
+  
+  try {
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    osc.connect(gain);
+    gain.connect(audioCtx.destination);
+    osc.frequency.value = freq;
+    osc.type = 'triangle';
+    gain.gain.setValueAtTime(0.15, startTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, startTime + duration / 1000);
+    osc.start(startTime);
+    osc.stop(startTime + duration / 1000);
+  } catch (e) {
+    console.log("Audio error:", e);
+  }
 }
 
 function playBirthdaySongLoop() {
-  if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  if (!audioCtx || audioCtx.state === 'closed') return;
+  
   let now = audioCtx.currentTime;
 
   const notes = [
@@ -191,7 +215,9 @@ function playBirthdaySongLoop() {
     t += dur * 1.15;
   }
 
-  setTimeout(playBirthdaySongLoop, totalDuration);
+  if (isPlaying) {
+    setTimeout(playBirthdaySongLoop, totalDuration);
+  }
 }
 
 function smoothScrollTo(targetY, duration = 4000) {
@@ -215,9 +241,15 @@ function startSurprise() {
   const p = document.querySelector("p");
   const message = document.getElementById("message");
 
-  if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  if (!audioCtx) {
+    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  }
+
   if (audioCtx.state === 'suspended') {
     audioCtx.resume().then(() => {
+      startAnimationAndMusic();
+    }).catch(err => {
+      console.log("Audio resume failed:", err);
       startAnimationAndMusic();
     });
   } else {
@@ -230,6 +262,7 @@ function startSurprise() {
     p.classList.add("show");
 
     setTimeout(() => {
+      isPlaying = true;
       playBirthdaySongLoop();
 
       setTimeout(() => {
@@ -242,11 +275,18 @@ function startSurprise() {
   }
 }
 
-document.getElementById("tap").addEventListener("click", startSurprise);
-document.getElementById("tap").addEventListener("touchstart", startSurprise);
+const tapElement = document.getElementById("tap");
+tapElement.addEventListener("click", startSurprise);
+tapElement.addEventListener("touchstart", function(e) {
+  e.preventDefault();
+  startSurprise();
+}, { passive: false });
+
+document.body.addEventListener("touchstart", function() {
+  if (!audioCtx) {
+    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  }
+}, { once: true });
 </script>
 </body>
 </html>
-
-
-
